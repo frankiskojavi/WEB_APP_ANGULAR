@@ -1,0 +1,99 @@
+<div class="container mt-7">
+    <div class="card p-5 shadow mx-auto" style="max-width: 100%; width: 100%; max-width: 600px;">
+      <h4 class="text-center mb-4">IVE Moneda Nacional</h4>
+  
+      <!-- Mostrar errores si hay problemas al cargar información -->
+      <div class="text-danger" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+  
+      <br>
+      <form (ngSubmit)="PostGenerarArchivo()">
+        <input type="hidden" id="codigoArchivo" [value]="formModel.codigoArchivo" />
+        <div class="row">
+          <!-- Campo Mes -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="Mes">Mes:</label>
+              <select class="form-control" [(ngModel)]="formModel.mes" name="mes" id="mesSelect" (change)="actualizarNombreArchivo()">
+                <option *ngFor="let mes of meses" [value]="mes.value">{{ mes.text }}</option>
+              </select>
+            </div>
+          </div>
+          <!-- Campo ano -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="ano">ano:</label>
+              <select class="form-control" [(ngModel)]="formModel.ano" name="ano" id="anoSelect" (change)="actualizarNombreArchivo()">
+                <option *ngFor="let ano of anos" [value]="ano">{{ ano }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+  
+        <div class="form-group mt-3">
+          <label for="Nombre">Archivo:</label>
+          <input type="text" class="form-control" [(ngModel)]="formModel.nombreArchivo" name="nombreArchivo" id="nombreArchivo" readonly />
+        </div>
+  
+        <br>
+  
+        <!-- Registros procesados -->
+        <div class="row border p-3 mb-3" style="border-color: #ccc; border-radius: 5px;">
+          <div class="col-md-6 col-sm-12 mb-3">
+            <div class="form-group">
+              <label>Registros Procesados:</label>
+              <input type="text" class="form-control" [(ngModel)]="formModel.registrosProcesados" name="registrosProcesados" readonly />
+            </div>
+          </div>
+          <div class="col-md-6 col-sm-12 mb-3">
+            <div class="form-group">
+              <label>Errores</label>
+              <input type="text" class="form-control" [(ngModel)]="formModel.registrosConError" name="registrosConError" readonly />
+            </div>
+          </div>
+        </div>
+  
+        <div class="row mt-4">
+          <!-- Botón Generar -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <button type="button" class="btn btn-primary w-100" (click)="mostrarMensajeConfirmacion()">Generar</button>
+            </div>
+          </div>
+          <!-- Botón Cancelar -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <button type="button" class="btn btn-danger w-100" (click)="cancelar()">Cancelar</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+
+ <!-- Pantalla de carga -->
+<div class="loading-screen" [style.display]="isLoading ? 'flex' : 'none'">
+  <div class="text-center">
+      <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+      </div>
+      <p>Procesando archivo...</p>
+  </div>
+</div>
+
+
+
+<app-ventana-modal-si-no
+  [title]="'Confirmación'"
+  [confirmButtonText]="'Si'" 
+  [cancelButtonText]="'No'"  
+  (onConfirm)="this.PostGenerarArchivo()"
+  (onCancel)="modalSiNo.close()">
+</app-ventana-modal-si-no>
+
+<app-ventana-modal-informativa
+  [title]="'Atención'"  
+>
+</app-ventana-modal-informativa>
