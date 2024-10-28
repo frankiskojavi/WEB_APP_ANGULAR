@@ -15,9 +15,12 @@ import { VentanaModalSiNoComponent } from '../../Shared/ventana-modal-si-no/vent
   imports: [FormsModule, RouterModule, CommonModule, VentanaModalSiNoComponent, VentanaModalInformativaComponent, LoadingScreenComponent]
 })
 export class ArchivoME13Component implements OnInit {
+
+  // Ventanas modal
   @ViewChild(VentanaModalSiNoComponent) modalSiNo!: VentanaModalSiNoComponent;
   @ViewChild(VentanaModalInformativaComponent) modalInformacion!: VentanaModalInformativaComponent;
   
+  // Modelo Pagina 
   formModel: any = {
     codigoArchivo: 'ME',
     mes: null,
@@ -27,6 +30,7 @@ export class ArchivoME13Component implements OnInit {
     registrosConError: 0
   };
 
+  // Variables del formulario   
   errorMessage: string | null = null;
   meses: { value: number, text: string }[] = [];
   anos: number[] = [];
@@ -34,35 +38,38 @@ export class ArchivoME13Component implements OnInit {
 
   constructor(private archivoME13Service: ArchivoME13Service) {}
 
+  // Form Load
   ngOnInit(): void {
     this.cargarInformacionDefault();    
   }
 
-  
-
+  // Form Post
   PostGenerarArchivo() {
-    this.isLoading = true;  // Mostrar la pantalla de carga
+    this.isLoading = true;
   
-    var fechaInicial = Number(this.formModel.ano + this.formModel.mes.toString().padStart(2, '0') + '01');
-    var fechaFinal = Number(this.formModel.ano + '' + this.formModel.mes.toString().padStart(2, '0') + '31');
+    const fechaInicial = Number(this.formModel.ano + this.formModel.mes.toString().padStart(2, '0') + '01');
+    const fechaFinal = Number(this.formModel.ano + '' + this.formModel.mes.toString().padStart(2, '0') + '31');
   
-    this.archivoME13Service.generarArchivo(this.formModel, this.formModel.nombreArchivo, fechaInicial, fechaFinal).subscribe({
+    this.archivoME13Service.GenerarArchivoIVE13ME(fechaInicial, fechaFinal).subscribe({
       next: (response) => {
+        // Descargar el archivo usando el nombre predefinido
         const link = document.createElement('a');
-        link.href = 'data:text/plain;base64,' + response.fileContent;
-        link.download = response.fileName;
+        const url = window.URL.createObjectURL(response.archivoBlob);
+        link.href = url;
+        link.download = this.formModel.nombreArchivo;
         link.click();
-  
-        // Mostrar la cantidad de registros procesados
-        this.formModel.registrosProcesados = response.registrosProcesados;
-  
-        this.mostrarMensajeFinalizado();
-        this.isLoading = false;  // Ocultar la pantalla de carga        
+        window.URL.revokeObjectURL(url);
+
+        // Actualizar las cantidades de registros en el modelo
+        this.formModel.registrosProcesados = response.cantidadRegistrosOK;
+        this.formModel.registrosConError = response.cantidadRegistrosError;
+
+        this.isLoading = false;        
       },
       error: (error) => {
         this.errorMessage = 'Hubo un error al generar el archivo.';
         console.error('Error al generar archivo:', error);
-        this.isLoading = false;  // Ocultar la pantalla de carga si hay error
+        this.isLoading = false;
       }
     });
   }
@@ -106,5 +113,4 @@ export class ArchivoME13Component implements OnInit {
       this.modalInformacion.open();
     }
   }
-  
 }

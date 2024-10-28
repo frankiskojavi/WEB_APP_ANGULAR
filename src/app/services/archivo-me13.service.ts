@@ -3,13 +3,17 @@ import { Injectable } from '@angular/core';
 import { map, Observable, of } from 'rxjs';
 import { environment } from '../environments/environment';
 
+export interface DTO_IVE13MEResponse {
+  cantidadRegistrosOK: number;
+  cantidadRegistrosError: number;
+  archivoTXT: string; // Contenido en base64 del archivo de texto
+}
+
 @Injectable({
   providedIn: 'root'
 })
-export class ArchivoME13Service {
-  
-  private apiUrl = `${environment.ApiUrlBase}/ArchivoME13/ConsultarInformacionArchivoIVE13MEPorFecha`;
-  
+export class ArchivoME13Service {  
+  private apiUrl = `${environment.ApiUrlBase}/ArchivoME13/GenerarArchivoIVE13ME`;  
   constructor(private http: HttpClient) {}
 
   // Obtener los meses disponibles
@@ -37,95 +41,27 @@ export class ArchivoME13Service {
     const anos = [];
   
     for (let year = 2000; year <= currentYear; year++) {
-      anos.push(year);  // Añade cada año al arreglo
+      anos.push(year);
     }
-  
-    return of(anos);  // Retorna el Observable con el arreglo de años
+
+    return of(anos); 
   }
 
-  // Generar el archivo
-  generarArchivo(formData: any, nombreArchivoGenerar: string, fechaInicial: number, fechaFinal: number): Observable<any> {
-    return this.GetApiConsultarInformacionArchivo(fechaInicial, fechaFinal).pipe(      
-      map(data => {        
-        const registrosProcesados = data.length;
-        const contenidoArchivo = this.obtenerArchivo(data);
-  
+  // Generar el archivo   
+  GenerarArchivoIVE13ME(fechaInicial: number, fechaFinal: number): Observable<{ archivoBlob: Blob, cantidadRegistrosOK: number, cantidadRegistrosError: number }> {
+    const url = `${this.apiUrl}?fechaInicial=${fechaInicial}&fechaFinal=${fechaFinal}`;
+
+    return this.http.get<DTO_IVE13MEResponse>(url).pipe(
+      map(response => {
+        // Convertir el archivo base64 en blob
+        const archivoBlob = new Blob([new Uint8Array(atob(response.archivoTXT).split("").map(char => char.charCodeAt(0)))], { type: 'text/plain' });
+        
         return {
-          success: true,
-          registrosProcesados: registrosProcesados,
-          registrosConError: 0,
-          fileName: nombreArchivoGenerar,
-          fileContent: contenidoArchivo
+          archivoBlob,
+          cantidadRegistrosOK: response.cantidadRegistrosOK,
+          cantidadRegistrosError: response.cantidadRegistrosError
         };
       })
     );
-  }
-
-  private obtenerArchivo(data: any[]): string {
-    const formattedData = data.map((item, index) => {
-      return this.formatearInformacion(            
-        item.lineaId,
-        item.fecha,
-        item.transaccion,
-        item.tipo_Moneda,
-        item.montoMO,
-        item.montoUSD,
-        item.cantidad_Trx,
-        item.agenciaid
-      );
-    }).join('\n');  // Unir todas las líneas por salto de línea    
-    return btoa(formattedData);
-  }
-
-  // Método para consumir la API y obtener la información
-  // Método para consumir la API y obtener la información
-  GetApiConsultarInformacionArchivo(fechaInicial: number, fechaFinal: number): Observable<any[]> {
-    const url = `${this.apiUrl}?fechaInicial=${fechaInicial}&fechaFinal=${fechaFinal}`;
-
-    return this.http.get<any[]>(url).pipe(
-      map(response => {
-        // Si la respuesta no es un arreglo, intentar convertirla a JSON
-        if (typeof response === 'string') {
-          try {
-            response = JSON.parse(response);
-          } catch (error) {
-            throw new Error("La respuesta no pudo ser parseada como JSON.");
-          }
-        }
-        
-        if (!Array.isArray(response)) {
-          throw new Error("La respuesta de la API no es un arreglo de datos.");
-        }
-
-        return response;
-      })
-    );
-  }
-
-
-  private formatearInformacion(lineaId: number, fecha: number, transaccion: string, tipoMoneda: string, montoMO: number, montoUSD: number, cantidadTrx: number, agenciaId: number): string {
-    return this.formatearCadena(lineaId.toString(), 16) +  // ID de la línea, alineado a la izquierda (16 caracteres)
-           `&&${fecha}` +  // Fecha
-           `&&${transaccion}` +  // Tipo de transacción
-           `&&${tipoMoneda}` +  // Tipo de moneda
-           `&&${this.formatearCadena(this.formatMonto(montoMO), 15, ' ', true)}` +
-           `&&${this.formatearCadena(this.formatMonto(montoUSD), 15, ' ', true)}` + 
-           `&&${this.formatearCadena(cantidadTrx.toString(), 10, ' ', true)}` + 
-           `&&${this.formatearCadena(agenciaId.toString(), 10, ' ', true)}`;
-  }
-
-
-  private formatearCadena(input: string, totalWidth: number, paddingChar: string = ' ', padLeft: boolean = false): string {
-    if (padLeft) {
-      return input.padStart(totalWidth, paddingChar);
-    } else {
-      return input.padEnd(totalWidth, paddingChar);
-    }
-  }
-  
-  private formatMonto(monto: number): string {
-    return monto.toFixed(2);
-  }
-
-
+  }    
 }
