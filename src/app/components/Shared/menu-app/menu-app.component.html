@@ -13,7 +13,7 @@
             </a>
             <!-- Submenú con todas las opciones -->
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li *ngFor="let menu of menuOptions">
+              <li *ngFor="let menu of menuOptions" (click)="guardarOpcionSeleccionada(menu)">
                 <a class="dropdown-item" [routerLink]="menu.menuPagina">{{ menu.menuDescripcion }}</a>
               </li>
             </ul>

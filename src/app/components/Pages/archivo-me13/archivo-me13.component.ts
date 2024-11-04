@@ -6,6 +6,8 @@ import { CommonModule } from '@angular/common';
 import { LoadingScreenComponent } from '../../Shared/loading-screen-component/loading-screen-component.component';
 import { VentanaModalInformativaComponent } from '../../Shared/ventana-modal-informativa/ventana-modal-informativa.component';
 import { VentanaModalSiNoComponent } from '../../Shared/ventana-modal-si-no/ventana-modal-si-no.component';
+import { MenuAppService } from '../../../services/menu-app.service';
+import { OpcionesMenu } from '../../Shared/modelosPublicos/menu.model';
 
 @Component({
   selector: 'app-archivo-me13',
@@ -27,7 +29,8 @@ export class ArchivoME13Component implements OnInit {
     ano: null,
     nombreArchivo: '',
     registrosProcesados: 0,
-    registrosConError: 0
+    registrosConError: 0, 
+    tituloPagina: ''
   };
 
   // Variables del formulario   
@@ -36,11 +39,12 @@ export class ArchivoME13Component implements OnInit {
   anos: number[] = [];
   isLoading: boolean = false;  // Controlar la pantalla de carga
 
-  constructor(private archivoME13Service: ArchivoME13Service) {}
+  constructor(private archivoME13Service: ArchivoME13Service, private menuService: MenuAppService) {}
 
   // Form Load
   ngOnInit(): void {
-    this.cargarInformacionDefault();    
+    this.cargarInformacionDefault();         
+    this.cargarInformacionMenu();
   }
 
   // Form Post
@@ -89,6 +93,18 @@ export class ArchivoME13Component implements OnInit {
     this.formModel.mes = currentDate.getMonth() + 1;
     this.formModel.ano = currentDate.getFullYear();
     this.actualizarNombreArchivo();
+  }
+
+  cargarInformacionMenu(){ 
+    // Suscríbete a la opción de menú seleccionada
+    this.menuService.selectedMenuOption$.subscribe({
+      next: (menuOption: OpcionesMenu | null) => {        
+        if (menuOption) {
+          console.log("si llegue");
+          this.formModel.tituloPagina = menuOption.menuDescripcion;
+        }
+      }
+    });
   }
 
   actualizarNombreArchivo() {

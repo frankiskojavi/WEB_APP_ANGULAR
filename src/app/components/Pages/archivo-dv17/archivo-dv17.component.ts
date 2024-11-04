@@ -6,6 +6,8 @@ import { LoadingScreenComponent } from '../../Shared/loading-screen-component/lo
 import { VentanaModalInformativaComponent } from '../../Shared/ventana-modal-informativa/ventana-modal-informativa.component';
 import { VentanaModalSiNoComponent } from '../../Shared/ventana-modal-si-no/ventana-modal-si-no.component';
 import { ArchivoDV17Service } from '../../../services/archivo-dv17.service';
+import { MenuAppService } from '../../../services/menu-app.service';
+import { OpcionesMenu } from '../../Shared/modelosPublicos/menu.model';
 
 @Component({
   selector: 'app-archivo-dv17',
@@ -36,10 +38,11 @@ export class ArchivoDV17Component implements OnInit{
   anos: number[] = [];
   isLoading: boolean = false;  // Controlar la pantalla de carga
 
-  constructor(private archivoDV17Service: ArchivoDV17Service) {}
+  constructor(private archivoDV17Service: ArchivoDV17Service, private menuService: MenuAppService) {}
 
   ngOnInit(): void {
     this.cargarInformacionDefault();   
+    this.cargarInformacionMenu();
   }
   
   // Form Post
@@ -88,6 +91,18 @@ export class ArchivoDV17Component implements OnInit{
     this.formModel.mes = currentDate.getMonth() + 1;
     this.formModel.ano = currentDate.getFullYear();
     this.actualizarNombreArchivo();
+  }
+
+  cargarInformacionMenu(){ 
+    // Suscríbete a la opción de menú seleccionada
+    this.menuService.selectedMenuOption$.subscribe({
+      next: (menuOption: OpcionesMenu | null) => {        
+        if (menuOption) {
+          console.log("si llegue");
+          this.formModel.tituloPagina = menuOption.menuDescripcion;
+        }
+      }
+    });
   }
 
   actualizarNombreArchivo() {
