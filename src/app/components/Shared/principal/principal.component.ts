@@ -1,20 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { OpcionesMenu } from '../../Shared/modelosPublicos/menu.model';
 import { MenuAppService } from '../../../services/menu-app.service';
-import { OpcionesMenu } from '../modelosPublicos/menu.model';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
-  standalone: true,  
-  selector: 'app-menu-app',
-  templateUrl: './menu-app.component.html',
-  styleUrls: ['./menu-app.component.css'],
-  imports: [CommonModule, RouterModule] 
+  selector: 'app-principal',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  templateUrl: './principal.component.html',
+  styleUrl: './principal.component.css'
 })
-export class MenuComponent implements OnInit {  
+export class PrincipalComponent implements OnInit{
   menuOptions: OpcionesMenu[] = [];
-
-  constructor(private menuService: MenuAppService) {}
+  constructor(private menuService: MenuAppService, private router: Router) {}
 
   ngOnInit(): void {
     // Llamamos a la API para obtener los datos del menú
@@ -28,8 +27,9 @@ export class MenuComponent implements OnInit {
     });    
   }
 
-  guardarOpcionSeleccionada(menuOption: OpcionesMenu): void {
+  guardarOpcionSeleccionada(menuOption: OpcionesMenu): void {        
     this.menuService.registrarOpcionSeleccioanda(menuOption);
+    this.router.navigate([menuOption.menuPagina]); 
   }    
-
+  
 }

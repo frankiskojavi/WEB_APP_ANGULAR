@@ -43,6 +43,10 @@ export class ArchivoDV17Component implements OnInit{
   ngOnInit(): void {
     this.cargarInformacionDefault();   
     this.cargarInformacionMenu();
+    const storedTitulo = localStorage.getItem('tituloPagina');
+    if (storedTitulo) {
+      this.formModel.tituloPagina = storedTitulo;
+    }
   }
   
   // Form Post
@@ -77,7 +81,7 @@ export class ArchivoDV17Component implements OnInit{
   }
 
   cancelar() {
-    window.location.href = '/';
+    window.location.href = 'inicio';
   }
 
   cargarInformacionDefault() {
@@ -99,7 +103,8 @@ export class ArchivoDV17Component implements OnInit{
       next: (menuOption: OpcionesMenu | null) => {        
         if (menuOption) {
           console.log("si llegue");
-          this.formModel.tituloPagina = menuOption.menuDescripcion;
+          this.formModel.tituloPagina = menuOption.menuTitulo;
+          localStorage.setItem('tituloPagina', menuOption.menuTitulo);
         }
       }
     });

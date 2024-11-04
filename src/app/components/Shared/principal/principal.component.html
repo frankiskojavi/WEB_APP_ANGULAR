@@ -1,0 +1,19 @@
+<div class="container mt-7 pt-5">
+    <div class="card p-5 shadow mx-auto" style="max-width: 100%; width: 100%; max-width: 1000px;">        
+        <form>
+            <div class="row">
+                <!-- Opcion-->
+                <div class="col-sm-6" *ngFor="let menu of menuOptions">
+                    <div class="card mt-4">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ menu.menuTitulo}}</h5>
+                            <p class="card-text">{{ menu.menuDescripcion }}</p>
+                            <a [routerLink]="menu.menuPagina" class="btn btn-primary" (click)="guardarOpcionSeleccionada(menu)">{{ menu.menuBoton}}</a>
+                        </div>
+                    </div>
+                <!-- Opcion-->
+                </div>                            
+            </div>            
+        </form>
+    </div>
+</div>
