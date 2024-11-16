@@ -33,9 +33,9 @@ export class VentanaModalSiNoComponent {
   close() {
     if (this.modalInstance) {
       this.modalInstance.hide();
-    }
+      
+    }    
   }
-
   // Cuando se hace clic en confirmar
   confirm() {
     this.onConfirm.emit();

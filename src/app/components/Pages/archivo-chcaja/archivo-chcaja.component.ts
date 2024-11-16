@@ -9,6 +9,7 @@ import { ArchivoDV17Service } from '../../../services/archivo-dv17.service';
 import { MenuAppService } from '../../../services/menu-app.service';
 import { OpcionesMenu } from '../../Shared/modelosPublicos/menu.model';
 import { ArchivoChcajaService } from '../../../services/archivo-chcaja.service';
+import { Subscription, take } from 'rxjs';
 
 @Component({
   selector: 'app-archivo-chcaja',
@@ -22,6 +23,7 @@ export class ArchivoChcajaComponent implements OnInit{
   // Ventanas modal
   @ViewChild(VentanaModalSiNoComponent) modalSiNo!: VentanaModalSiNoComponent;
   @ViewChild(VentanaModalInformativaComponent) modalInformacion!: VentanaModalInformativaComponent;
+  private confirmSubscription: Subscription | null = null;
 
 // Modelo Pagina 
   formModel: any = {
@@ -55,7 +57,7 @@ export class ArchivoChcajaComponent implements OnInit{
   }
   
   // Form Post
-  PostGenerarArchivo() {
+  GenerarArchivo() {
     this.isLoading = true;
   
     const fechaInicial = Number(this.formModel.ano + this.formModel.mes.toString().padStart(2, '0') + '01');
@@ -68,6 +70,38 @@ export class ArchivoChcajaComponent implements OnInit{
         const url = window.URL.createObjectURL(response.archivoBlob);
         link.href = url;
         link.download = this.formModel.nombreArchivo;
+        link.click();
+        window.URL.revokeObjectURL(url);
+
+        // Actualizar las cantidades de registros en el modelo
+        this.formModel.registrosOKEncabezado = response.registrosOKEncabezado;
+        this.formModel.registrosERROREncabezado = response.registrosERROREncabezado;
+        this.formModel.registrosOKDetalle = response.registrosOKDetalle;
+        this.formModel.registrosERRORDetalle = response.registrosERRORDetalle;
+        this.formModel.cantidadNit = response.cantidadNit
+
+        this.isLoading = false;        
+      },
+      error: (error) => {
+        this.errorMessage = 'Hubo un error al generar el archivo.';
+        console.error('Error al generar archivo:', error);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  GenerarArchivoPreliminar() {
+    this.isLoading = true;  
+    const fechaInicial = Number(this.formModel.ano + this.formModel.mes.toString().padStart(2, '0') + '01');
+    const fechaFinal = Number(this.formModel.ano + '' + this.formModel.mes.toString().padStart(2, '0') + '31');
+  
+    this.archivoCHCaja.GeneracionArchivoCHCajaPreliminar(fechaInicial, fechaFinal).subscribe({
+      next: (response) => {
+        // Descargar el archivo usando el nombre predefinido
+        const link = document.createElement('a');
+        const url = window.URL.createObjectURL(response.archivoBlob);
+        link.href = url;
+        link.download = this.formModel.nombreArchivoPreliminar;
         link.click();
         window.URL.revokeObjectURL(url);
 
@@ -128,12 +162,25 @@ export class ArchivoChcajaComponent implements OnInit{
     }
   }
 
-  mostrarMensajeConfirmacion() {
+  mostrarMensajeConfirmacion(definitivo: boolean) { 
     if (this.modalSiNo) {
-      this.modalSiNo.bodyText = `¿Está seguro de generar el archivo "${this.formModel.nombreArchivo}"?`;
+      //Limpia suscripción      
+      if (this.confirmSubscription) {
+        this.confirmSubscription.unsubscribe();
+      }
+      this.modalSiNo.bodyText = `¿Está seguro de generar el archivo "${this.formModel.nombreArchivo}"?`;      
+      this.confirmSubscription = this.modalSiNo.onConfirm.subscribe(() => {
+        if (definitivo) {
+          this.GenerarArchivo();
+        } else {
+          this.GenerarArchivoPreliminar();
+        }
+        this.confirmSubscription?.unsubscribe();
+      });
       this.modalSiNo.open();
     }
   }
+
 
   mostrarMensajeFinalizado() {
     if (this.modalInformacion) {

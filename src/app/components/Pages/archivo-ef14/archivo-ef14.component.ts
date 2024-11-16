@@ -8,6 +8,7 @@ import { VentanaModalSiNoComponent } from '../../Shared/ventana-modal-si-no/vent
 import { ArchivoME14Service } from '../../../services/archivo-me14.service';
 import { OpcionesMenu } from '../../Shared/modelosPublicos/menu.model';
 import { MenuAppService } from '../../../services/menu-app.service';
+import { Subscription, take } from 'rxjs';
 
 @Component({
   selector: 'app-archivo-me14',
@@ -21,6 +22,7 @@ export class ArchivoME14Component implements OnInit{
   // Ventanas modal
   @ViewChild(VentanaModalSiNoComponent) modalSiNo!: VentanaModalSiNoComponent;
   @ViewChild(VentanaModalInformativaComponent) modalInformacion!: VentanaModalInformativaComponent;
+  private confirmSubscription: Subscription | null = null;
   
   // Modelo Pagina 
   formModel: any = {
@@ -51,7 +53,7 @@ export class ArchivoME14Component implements OnInit{
   }
 
   // Form Post
-  PostGenerarArchivo() {
+  GenerarArchivo() {
     this.isLoading = true;
   
     const fechaInicial = Number(this.formModel.ano + this.formModel.mes.toString().padStart(2, '0') + '01');
@@ -119,10 +121,18 @@ export class ArchivoME14Component implements OnInit{
       this.formModel.nombreArchivo = `${codigoArchivo}${ano.toString().slice(-2)}${mes.toString().padStart(2, '0')}BA.117`;
     }
   }
-
-  mostrarMensajeConfirmacion() {
+  
+  mostrarMensajeConfirmacion() { 
     if (this.modalSiNo) {
-      this.modalSiNo.bodyText = `¿Está seguro de generar el archivo "${this.formModel.nombreArchivo}"?`;
+      //Limpia suscripción      
+      if (this.confirmSubscription) {
+        this.confirmSubscription.unsubscribe();
+      }
+      this.modalSiNo.bodyText = `¿Está seguro de generar el archivo "${this.formModel.nombreArchivo}"?`;      
+      this.confirmSubscription = this.modalSiNo.onConfirm.subscribe(() => {
+        this.GenerarArchivo();        
+        this.confirmSubscription?.unsubscribe();
+      });
       this.modalSiNo.open();
     }
   }

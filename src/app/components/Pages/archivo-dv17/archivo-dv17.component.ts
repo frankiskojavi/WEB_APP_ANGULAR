@@ -8,6 +8,7 @@ import { VentanaModalSiNoComponent } from '../../Shared/ventana-modal-si-no/vent
 import { ArchivoDV17Service } from '../../../services/archivo-dv17.service';
 import { MenuAppService } from '../../../services/menu-app.service';
 import { OpcionesMenu } from '../../Shared/modelosPublicos/menu.model';
+import { Subscription, take } from 'rxjs';
 
 @Component({
   selector: 'app-archivo-dv17',
@@ -21,7 +22,8 @@ export class ArchivoDV17Component implements OnInit{
 // Ventanas modal
   @ViewChild(VentanaModalSiNoComponent) modalSiNo!: VentanaModalSiNoComponent;
   @ViewChild(VentanaModalInformativaComponent) modalInformacion!: VentanaModalInformativaComponent;
-
+  private confirmSubscription: Subscription | null = null;
+  
 // Modelo Pagina 
   formModel: any = {
     codigoArchivo: 'DV',
@@ -50,7 +52,7 @@ export class ArchivoDV17Component implements OnInit{
   }
   
   // Form Post
-  PostGenerarArchivo() {
+  GenerarArchivo() {
     this.isLoading = true;
   
     const fechaInicial = Number(this.formModel.ano + this.formModel.mes.toString().padStart(2, '0') + '01');
@@ -119,9 +121,17 @@ export class ArchivoDV17Component implements OnInit{
     }
   }
 
-  mostrarMensajeConfirmacion() {
+  mostrarMensajeConfirmacion() { 
     if (this.modalSiNo) {
-      this.modalSiNo.bodyText = `¿Está seguro de generar el archivo "${this.formModel.nombreArchivo}"?`;
+      //Limpia suscripción      
+      if (this.confirmSubscription) {
+        this.confirmSubscription.unsubscribe();
+      }
+      this.modalSiNo.bodyText = `¿Está seguro de generar el archivo "${this.formModel.nombreArchivo}"?`;      
+      this.confirmSubscription = this.modalSiNo.onConfirm.subscribe(() => {
+        this.GenerarArchivo();        
+        this.confirmSubscription?.unsubscribe();
+      });
       this.modalSiNo.open();
     }
   }

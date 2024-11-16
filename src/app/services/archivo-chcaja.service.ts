@@ -18,7 +18,8 @@ export interface DTO_CHCAJAVResponse {
 })
 
 export class ArchivoChcajaService {
-  private apiUrl = `${environment.ApiUrlBase}/ArchivoCH/GenerarArchivoTemporal`;
+  private apiUrl = `${environment.ApiUrlBase}/ArchivoCH/GenerarArchivoDefinitivo`;
+  private apiUrlPreliminar = `${environment.ApiUrlBase}/ArchivoCH/GenerarArchivoPrelminar`;
   constructor(private http: HttpClient) { }
 
   // Obtener los meses disponibles
@@ -79,5 +80,33 @@ export class ArchivoChcajaService {
         };
       })
     );
-  }      
+  }
+  
+  GeneracionArchivoCHCajaPreliminar(fechaInicial: number, 
+                          fechaFinal: number): 
+                          Observable<{ archivoBlob: Blob, 
+                                       registrosOKEncabezado: number, 
+                                       registrosERROREncabezado: number,
+                                       registrosOKDetalle : number,
+                                       registrosERRORDetalle : number,
+                                       cantidadNit: number
+                                     }> {
+    const url = `${this.apiUrlPreliminar}?fechaInicial=${fechaInicial}&fechaFinal=${fechaFinal}`;
+
+    return this.http.get<DTO_CHCAJAVResponse>(url).pipe(
+      map(response => {
+        // Convertir el archivo base64 en blob
+        const archivoBlob = new Blob([new Uint8Array(atob(response.archivoTXTOk).split("").map(char => char.charCodeAt(0)))], { type: 'text/plain' });
+        
+        return {
+          archivoBlob,
+          registrosOKEncabezado: response.registrosOKEncabezado,
+          registrosERROREncabezado: response.registrosErrorEncabezado,
+          registrosOKDetalle: response.registrosOKDetalle,
+          registrosERRORDetalle: response.registrosERRORDetalle,
+          cantidadNit: response.cantidadNit
+        };
+      })
+    );
+  }
 }

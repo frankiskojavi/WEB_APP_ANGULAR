@@ -3,7 +3,7 @@
         <h4 class="text-center mb-4">{{ formModel.tituloPagina }}</h4>
 
         <br>
-        <form (ngSubmit)="PostGenerarArchivo()">
+        <form>
             <input type="hidden" id="codigoArchivo" [value]="formModel.codigoArchivo" />
             <div class="row">
                 <!-- Campo Mes -->
@@ -90,16 +90,23 @@
 
 
             <div class="row">
-                <!-- Botón Generar -->
-                <div class="col-md-6">
+                <!-- Botón Preliminar -->
+                <div class="col-md-4">
                     <div class="form-group">
                         <br>
-                        <button type="button" class="btn btn-primary w-100"
-                            (click)="mostrarMensajeConfirmacion()">Generar</button>
+                        <button type="button" class="btn btn-warning w-100"
+                            (click)="mostrarMensajeConfirmacion(false)">Preliminar</button>
+                    </div>
+                </div>
+                <!-- Botón Generar -->
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <br>
+                        <button type="button" class="btn btn-primary w-100" (click)="mostrarMensajeConfirmacion(true)">Generar</button>
                     </div>
                 </div>
                 <!-- Botón Cancelar -->
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group">
                         <br>
                         <button type="button" class="btn btn-danger w-100" (click)="cancelar()">Cancelar</button>
@@ -129,8 +136,11 @@
 
 
 
-<app-ventana-modal-si-no [title]="'Confirmación'" [confirmButtonText]="'Si'" [cancelButtonText]="'No'"
-    (onConfirm)="this.PostGenerarArchivo()" (onCancel)="modalSiNo.close()">
+<app-ventana-modal-si-no 
+[title]="'Confirmación'" 
+[confirmButtonText]="'Si'" 
+[cancelButtonText]="'No'"
+(onCancel)="modalSiNo.close()">
 </app-ventana-modal-si-no>
 
 <app-ventana-modal-informativa [title]="'Atención'">
