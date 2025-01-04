@@ -4,9 +4,13 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable, of } from 'rxjs';
 
 export interface DTO_IVE21TRFResponse {
-  cantidadRegistrosOK: number;
-  cantidadRegistrosError: number;
-  archivoTXT: string; // Contenido en base64 del archivo de texto
+  registrosOKEncabezado: number;
+  registrosErrorEncabezado: number;
+  registrosOKDetalle: number; 
+  registrosERRORDetalle: number; 
+  cantidadNit: number; 
+  archivoTXTErrores: string; 
+  archivoTXTOk: string; // Contenido en base64 del archivo de texto
 }
 
 @Injectable({
@@ -56,12 +60,12 @@ export class ArchivoTrf21Service {
         return this.http.get<DTO_IVE21TRFResponse>(url).pipe(
           map(response => {
             // Convertir el archivo base64 en blob
-            const archivoBlob = new Blob([new Uint8Array(atob(response.archivoTXT).split("").map(char => char.charCodeAt(0)))], { type: 'text/plain' });
+            const archivoBlob = new Blob([new Uint8Array(atob(response.archivoTXTOk).split("").map(char => char.charCodeAt(0)))], { type: 'text/plain' });
             
             return {
               archivoBlob,
-              cantidadRegistrosOK: response.cantidadRegistrosOK,
-              cantidadRegistrosError: response.cantidadRegistrosError
+              cantidadRegistrosOK: response.registrosOKEncabezado,
+              cantidadRegistrosError: response.registrosErrorEncabezado
             };
           })
         );
