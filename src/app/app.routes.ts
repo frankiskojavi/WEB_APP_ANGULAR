@@ -5,6 +5,7 @@ import { ArchivoME14Component } from './components/Pages/archivo-ef14/archivo-ef
 import { ArchivoDV17Component } from './components/Pages/archivo-dv17/archivo-dv17.component';
 import { PrincipalComponent } from './components/Shared/principal/principal.component';
 import { ArchivoChcajaComponent } from './components/Pages/archivo-chcaja/archivo-chcaja.component';
+import { ArchivoTrf21Component } from './components/Pages/archivo-trf21/archivo-trf21.component';
 
 export const routes: Routes = [
   { path: 'menu', component: MenuComponent },
@@ -13,5 +14,6 @@ export const routes: Routes = [
   { path: 'archivo-ef14', component: ArchivoME14Component },
   { path: 'archivo-dv17', component: ArchivoDV17Component },
   { path: 'archivo-chcaja', component: ArchivoChcajaComponent },
+  { path: 'archivo-trf21', component: ArchivoTrf21Component },
   { path: 'inicio', component: PrincipalComponent },  
 ];
