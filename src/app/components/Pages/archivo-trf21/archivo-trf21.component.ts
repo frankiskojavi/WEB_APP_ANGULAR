@@ -12,17 +12,17 @@ import { ArchivoTrf21Service } from '../../../services/archivo-trf21.service';
 
 @Component({
   selector: 'app-archivo-trf21',
-  standalone: true,  
+  standalone: true,
   templateUrl: './archivo-trf21.component.html',
   styleUrl: './archivo-trf21.component.css',
   imports: [FormsModule, RouterModule, CommonModule, VentanaModalSiNoComponent, VentanaModalInformativaComponent, LoadingScreenComponent]
 })
 export class ArchivoTrf21Component {
-// Ventanas modal
+  // Ventanas modal
   @ViewChild(VentanaModalSiNoComponent) modalSiNo!: VentanaModalSiNoComponent;
   @ViewChild(VentanaModalInformativaComponent) modalInformacion!: VentanaModalInformativaComponent;
   private confirmSubscription: Subscription | null = null;
-  
+
   // Modelo Pagina 
   formModel: any = {
     codigoArchivo: 'TRF',
@@ -31,7 +31,7 @@ export class ArchivoTrf21Component {
     nombreArchivo: '',
     registrosProcesados: 0,
     registrosConError: 0
-  };  
+  };
 
   // Variables del formulario   
   errorMessage: string | null = null;
@@ -39,12 +39,12 @@ export class ArchivoTrf21Component {
   anos: number[] = [];
   isLoading: boolean = false;  // Controlar la pantalla de carga
 
-  constructor(private archivoTrf21Service: ArchivoTrf21Service, private menuService: MenuAppService) {}
+  constructor(private archivoTrf21Service: ArchivoTrf21Service, private menuService: MenuAppService) { }
 
   // Form Load
   ngOnInit(): void {
-    this.cargarInformacionDefault();  
-    this.cargarInformacionMenu(); 
+    this.cargarInformacionDefault();
+    this.cargarInformacionMenu();
     const storedTitulo = localStorage.getItem('tituloPagina');
     if (storedTitulo) {
       this.formModel.tituloPagina = storedTitulo;
@@ -54,10 +54,10 @@ export class ArchivoTrf21Component {
   // Form Post
   GenerarArchivo() {
     this.isLoading = true;
-  
+
     const fechaInicial = Number(this.formModel.ano + this.formModel.mes.toString().padStart(2, '0') + '01');
     const fechaFinal = Number(this.formModel.ano + '' + this.formModel.mes.toString().padStart(2, '0') + '31');
-  
+
     this.archivoTrf21Service.GenerarArchivoIVE21TRF(fechaInicial, fechaFinal).subscribe({
       next: (response) => {
         // Descargar el archivo usando el nombre predefinido
@@ -72,7 +72,7 @@ export class ArchivoTrf21Component {
         this.formModel.registrosProcesados = response.cantidadRegistrosOK;
         this.formModel.registrosConError = response.cantidadRegistrosError;
 
-        this.isLoading = false;        
+        this.isLoading = false;
       },
       error: (error) => {
         this.errorMessage = 'Hubo un error al generar el archivo.';
@@ -99,10 +99,10 @@ export class ArchivoTrf21Component {
     this.actualizarNombreArchivo();
   }
 
-  cargarInformacionMenu(){ 
+  cargarInformacionMenu() {
     // Suscríbete a la opción de menú seleccionada
     this.menuService.selectedMenuOption$.subscribe({
-      next: (menuOption: OpcionesMenu | null) => {        
+      next: (menuOption: OpcionesMenu | null) => {
         if (menuOption) {
           console.log("si llegue");
           this.formModel.tituloPagina = menuOption.menuTitulo;
@@ -120,16 +120,16 @@ export class ArchivoTrf21Component {
       this.formModel.nombreArchivo = `${codigoArchivo}${ano.toString().slice(-2)}${mes.toString().padStart(2, '0')}BA.117`;
     }
   }
-  
-  mostrarMensajeConfirmacion() { 
+
+  mostrarMensajeConfirmacion() {
     if (this.modalSiNo) {
       //Limpia suscripción      
       if (this.confirmSubscription) {
         this.confirmSubscription.unsubscribe();
       }
-      this.modalSiNo.bodyText = `¿Está seguro de generar el archivo "${this.formModel.nombreArchivo}"?`;      
+      this.modalSiNo.bodyText = `¿Está seguro de generar el archivo "${this.formModel.nombreArchivo}"?`;
       this.confirmSubscription = this.modalSiNo.onConfirm.subscribe(() => {
-        this.GenerarArchivo();        
+        this.GenerarArchivo();
         this.confirmSubscription?.unsubscribe();
       });
       this.modalSiNo.open();
