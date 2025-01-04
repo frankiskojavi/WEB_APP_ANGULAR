@@ -3,7 +3,7 @@ import { environment } from '../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable, of } from 'rxjs';
 
-export interface DTO_IVE17DVResponse {
+export interface DTO_IVE21TRFResponse {
   cantidadRegistrosOK: number;
   cantidadRegistrosError: number;
   archivoTXT: string; // Contenido en base64 del archivo de texto
@@ -53,7 +53,7 @@ export class ArchivoTrf21Service {
       GenerarArchivoIVE21TRF(fechaInicial: number, fechaFinal: number): Observable<{ archivoBlob: Blob, cantidadRegistrosOK: number, cantidadRegistrosError: number }> {
         const url = `${this.apiUrl}?fechaInicial=${fechaInicial}&fechaFinal=${fechaFinal}`;
     
-        return this.http.get<DTO_IVE17DVResponse>(url).pipe(
+        return this.http.get<DTO_IVE21TRFResponse>(url).pipe(
           map(response => {
             // Convertir el archivo base64 en blob
             const archivoBlob = new Blob([new Uint8Array(atob(response.archivoTXT).split("").map(char => char.charCodeAt(0)))], { type: 'text/plain' });
